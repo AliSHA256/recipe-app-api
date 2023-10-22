@@ -20,6 +20,7 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -72,7 +73,7 @@ instance/
 docs/_build/
 
 # PyBuilder
-.pybuilder/
+
 target/
 
 # Jupyter Notebook
