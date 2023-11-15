@@ -43,7 +43,7 @@ class ModelTests(TestCase):
         user = get_user_model().objects.create_superuser(
             'superuser@example.com',
             'test123',
-        ) 
+        )
         """is_superuser is a filled provided by premissionMixin."""
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
