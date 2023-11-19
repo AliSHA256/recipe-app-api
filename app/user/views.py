@@ -2,8 +2,13 @@
 Views for the user API.
 """
 from rest_framework import generics
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.settings import api_settings
 
-from user.serializers import UserSerializer
+from user.serializers import (
+    UserSerializer,
+    AuthTokenSerializer,
+)
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -12,3 +17,20 @@ class CreateUserView(generics.CreateAPIView):
     """
 
     serializer_class = UserSerializer
+
+
+"""
+When a user provides their credentials through CreateTokenView, 
+the AuthTokenSerializer validates these credentials. 
+If successful, the ObtainAuthToken view logic then generates
+a token for this authenticated user. 
+This token is typically used in subsequent 
+API requests to authenticate the user.
+"""
+
+class CreateTokenView(ObtainAuthToken):
+    """
+    Create a new auth token for user.
+    """
+    serializer_class = AuthTokenSerializer
+    renderer_classes= api_settings.DEFAULT_RENDERER_CLASSES
