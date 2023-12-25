@@ -7,7 +7,11 @@ class CalcTests(SimpleTestCase):
 
     def test_add_numbers(self):
         """Test adding numbers together"""
-
+        """
+        self is used to access 
+        methods and attributes of the
+        SimpleTestCase class, which CalcTests inherits from.
+        """
         res = calc.add(5, 6)
         self.assertEqual(res, 11)
 
