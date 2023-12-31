@@ -48,17 +48,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
             recipe.tags.add(tag_obj)
 
-    
     def _get_or_create_ingredient(self, ingredients, recipe):
         """Getting and creating ingredients."""
         auth_user = self.context['request'].user
         for ingredient in ingredients:
-            ingredient_obj, created = Tag.objects.get_or_create(
+            ingredient_obj, created = Ingredient.objects.get_or_create(
                 user=auth_user,
                 **ingredient,
             )
-            recipe.ingredient.add(ingredient_obj)
-        
+            recipe.ingredients.add(ingredient_obj)
 
     def create(self, validated_data):
         """Create a recipe."""
@@ -66,7 +64,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients', [])
         recipe = Recipe.objects.create(**validated_data)
         self._get_or_create_tags(tags, recipe)
-        self._get_or_create_tags(ingredients, recipe)
+        self._get_or_create_ingredient(ingredients, recipe)
         return recipe
 
     def update(self, instance, validated_data):
