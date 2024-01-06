@@ -1,7 +1,6 @@
 """
 Tests for recipe APIs.
 """
-
 from decimal import Decimal
 import tempfile
 import os
@@ -401,6 +400,52 @@ class PrivateRecipeAPITest(TestCase):
         self.assertNotIn(ingredient, recipe.ingredients.all())
         self.assertEqual(recipe.ingredients.count(), 0)
 
+    def test_filter_by_tags(self):
+        """Test filtering recipes by tags."""
+        r1 = create_recipe(user=self.user, title='Ali Buggati')
+        r2 = create_recipe(user=self.user, title='shawerma')
+        tag1 = Tag.objects.create(user=self.user, name='Veg')
+        tag2 = Tag.objects.create(user=self.user, name='cheese')
+        r1.tags.add(tag1)
+        r2.tags.add(tag2)
+        r3 = create_recipe(user=self.user, title='Fish')
+
+        params = {
+            'tags': f'{tag1.id},{tag2.id}',
+        }
+        res = self.client.get(RECIPE_URL, params)
+
+        s1 = RecipeSerializer(r1)
+        s2 = RecipeSerializer(r2)
+        s3 = RecipeSerializer(r3)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(s1.data, res.data)
+        self.assertIn(s2.data, res.data)
+        self.assertNotIn(s3.data, res.data)
+
+    def test_filter_by_ingredients(self):
+        """Test filtering recipes by ingredients."""
+        r1 = create_recipe(user=self.user, title='pizza')
+        r2 = create_recipe(user=self.user, title='cake')
+        in1 = Ingredient.objects.create(user=self.user, name='cheese')
+        in2 = Ingredient.objects.create(user=self.user, name='berry')
+        r1.ingredients.add(in1)
+        r2.ingredients.add(in2)
+        r3 = create_recipe(user=self.user, title='lob')
+
+        params = {
+            'ingredients': f'{in1.id},{in2.id}',
+        }
+        res = self.client.get(RECIPE_URL, params)
+
+        s1 = RecipeSerializer(r1)
+        s2 = RecipeSerializer(r2)
+        s3 = RecipeSerializer(r3)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(s1.data, res.data)
+        self.assertIn(s2.data, res.data)
+        self.assertNotIn(s3.data, res.data)
+
 
 class ImageUploadTests(TestCase):
     """Tests for Image upload API."""
@@ -425,7 +470,7 @@ class ImageUploadTests(TestCase):
             img.save(image_file, format='JPEG')
             image_file.seek(0)
             payload = {'image': image_file}
-            res = self.client.post(url, payload=payload, format='multipart')
+            res = self.client.post(url, payload, format='multipart')
 
         self.recipe.refresh_from_db()
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -436,6 +481,6 @@ class ImageUploadTests(TestCase):
         """Test uploading invalid image."""
         url = image_upload_url(self.recipe.id)
         payload = {'image': 'not an Image'}
-        res = self.client.post(url, payload=payload, format='multipart')
+        res = self.client.post(url, payload, format='multipart')
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
